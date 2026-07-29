@@ -22,12 +22,9 @@
   <img src="https://img.shields.io/badge/Architecture-Modular%20%2B%20Layered-blue?style=flat-square" />
 </div>
 
-## ❓ ABOUT
+## ABOUT
 **Cloth Ecommerce** is a REST API for an online clothing store, built with **Rust + Axum**. The project prioritizes **zero-GC memory efficiency** — no Java, no C#, no Go. Just raw Rust performance.
 
 Built on top of **Tokio** (async runtime) and **Tower** (middleware/service abstractions), this project uses a **Modular + Layered Architecture** — clean enough for a solo dev, scalable enough for a small team. No microservices, no overengineering. Just a solid monorepo that gets the job done.
 
 > Why Rust over Golang? Simple — no garbage collector means predictable, low memory consumption at scale. This project is also a personal challenge to push deeper into systems programming with a production-grade use case., only mono repo. I challenge myself with a brandnew and hard development framework (actix harder, I know), to learn how a programming language that not use GC, to see how far I can go.
-
----
-<p align="center">Made with 🦀 and a bit of suffering</p>
