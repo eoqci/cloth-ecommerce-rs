@@ -28,3 +28,5 @@
 Built on top of **Tokio** (async runtime) and **Tower** (middleware/service abstractions), this project uses a **Modular + Layered Architecture** — clean enough for a solo dev, scalable enough for a small team. No microservices, no overengineering. Just a solid monorepo that gets the job done.
 
 > Why Rust over Golang? Simple — no garbage collector means predictable, low memory consumption at scale. This project is also a personal challenge to push deeper into systems programming with a production-grade use case., only mono repo. I challenge myself with a brandnew and hard development framework (actix harder, I know), to learn how a programming language that not use GC, to see how far I can go.
+
+I may need refactor the whole codebase soon. So as i see, its quite outdated with what i got. the codebase may more complicated than it used to be, but easier to maintain. The ideally is im gonna make state into deep module root, each module has it own state, problems is you might see the codebase is too hard to able to read anyway. so i will change it soon.
