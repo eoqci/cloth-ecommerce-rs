@@ -1,6 +1,7 @@
 use crate::modules::user::model::{AuthProvider, User, UserRole, UserStatus};
 use sqlx::{Error, PgPool};
 
+#[derive(Clone)]
 pub struct AuthRepository {
     pool: PgPool,
 }
