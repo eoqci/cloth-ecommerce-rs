@@ -11,6 +11,7 @@ use crate::{
         admin::repository::AdminRepository,
         auth::AuthRepository,
         category::repository::CategoryRepository,
+        module_state::ModuleState,
         order::repository::OrderRepository,
         product::repository::ProductRepository,
         user::{repository::UserRepository, service::UserService},
@@ -38,6 +39,8 @@ pub struct AppState {
     pub category_repo: Arc<CategoryRepository>,
     pub product_repo: Arc<ProductRepository>,
     pub order_repo: Arc<OrderRepository>,
+
+    pub module_state: Arc<ModuleState>,
 }
 
 impl AppState {

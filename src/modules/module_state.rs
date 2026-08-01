@@ -1,11 +1,25 @@
-use crate::modules::admin::state::AdminState;
+use sqlx::PgPool;
+
+use crate::{
+    config::Config,
+    modules::{admin::state::AdminState, auth::state::AuthState, cart::state::CartState},
+};
 
 #[derive(Clone)]
 pub struct ModuleState {
     pub admin_state: AdminState,
     pub auth_state: AuthState,
-    pub user_state: UserState,
-    pub cartegory_state: CartState,
-    pub product_state: ProductState,
-    pub order_state: OrderState,
+    // pub user_state: UserState,
+    pub cart_state: CartState,
+    pub category_state: CategoryState,
+    // pub product_state: ProductState,
+    // pub order_state: OrderState,
+}
+
+impl ModuleState {
+    pub fn new(db: PgPool, config: Config) -> Self {
+        Self {
+            auth_state: AuthState::new(db.clone()),
+        }
+    }
 }

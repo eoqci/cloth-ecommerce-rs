@@ -4,6 +4,7 @@ use sqlx::PgPool;
 
 use crate::modules::auth::{AuthRepository, service::AuthService};
 
+#[derive(Clone)]
 pub struct AuthState {
     pub auth_repo: Arc<AuthRepository>,
     pub auth_service: Arc<AuthService>,
