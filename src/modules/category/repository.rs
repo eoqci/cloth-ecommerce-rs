@@ -6,6 +6,7 @@ use crate::{
     modules::{cart::dto::CartItemDb, category::model::Category},
 };
 
+#[derive(Clone)]
 pub struct CategoryRepository {
     pool: PgPool,
 }

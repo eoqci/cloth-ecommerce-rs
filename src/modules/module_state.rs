@@ -19,6 +19,7 @@ pub struct ModuleState {
 impl ModuleState {
     pub fn new(db: PgPool, config: Config) -> Self {
         Self {
+            admin_state: AdminState::new(db.clone()),
             auth_state: AuthState::new(db.clone()),
         }
     }
