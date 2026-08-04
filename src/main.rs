@@ -2,6 +2,7 @@ mod app;
 mod app_state;
 mod config;
 mod error;
+mod errors;
 mod infrastructure;
 mod modules;
 mod shared;
