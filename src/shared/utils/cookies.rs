@@ -51,7 +51,8 @@ pub fn extract_cookie<'a>(headers: &'a HeaderMap, name: &str) -> Option<String> 
 }
 
 pub fn clear_auth_cookies_response(status: StatusCode, config: &Config) -> Response {
-    // Max-Age=0 → browser xóa cookie ngay lập tức
+    // Max-Age=0
+    // Remove cookie immediately
     let clear_access = build_cookie_string("access_token", "", "/", 0, config);
     let clear_refresh = build_cookie_string("refresh_token", "", "/api/v1/auth/refresh", 0, config);
 
