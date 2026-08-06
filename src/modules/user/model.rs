@@ -40,23 +40,13 @@ pub enum AuthProvider {
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
     pub id: Uuid,
-
-    pub email: String,
-
-    // When return JSON to FE, auto hide this field
-    #[serde(skip_serializing)]
-    pub password_hash: Option<String>,
-
     pub name: String,
     pub avatar_url: Option<String>,
     pub description: Option<String>,
-
     pub role: UserRole,
     pub status: UserStatus,
-
     pub provider: AuthProvider,
-    pub provider_id: Option<String>,
-
+    pub provider_id: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -65,8 +55,26 @@ pub struct User {
 pub struct UserSession {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub refresh_token: String,
+    pub refresh_token_hash: String,
     pub user_agent: Option<String>,
     pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+pub struct UserAddresses {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub recipient_name: String,
+    pub recipient_phone: String,
+
+    // addresses
+    pub address_line: String,
+    pub ward: Option<String>,
+    pub district: String,
+    pub city: String,
+
+    pub is_default: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
