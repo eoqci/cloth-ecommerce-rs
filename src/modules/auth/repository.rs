@@ -17,37 +17,46 @@ impl AuthRepository {
         Self { pool }
     }
 
-    // Create new user - Register
-    pub async fn create_user(
+    // find or create by google - oauth
+    pub async fn find_or_create_by_google(
         &self,
-        name: String,
-        email: String,
-        password_hash: String,
-    ) -> Result<User, Error> {
+        email: &str,
+        name: &str,
+        avatar_url: &str,
+        provider: AuthProvider,
+        provider_id: &str,
+    ) -> Result<User, sqlx::Error> {
         let user = sqlx::query_as!(
             User,
             r#"
-                INSERT INTO users (name, email, password_hash, role, status, provider, provider_id)
-                VALUES ($1, $2, $3, 'user', 'unverified', 'local', NULL)
-                RETURNING
-                    id,
-                    email,
-                    password_hash,
-                    name,
-                    avatar_url,
-                    description,
-                    role as "role: UserRole",
-                    status as "status: UserStatus",
-                    provider as "provider: AuthProvider",
-                    provider_id,
-                    created_at,
-                    updated_at
+                    INSERT INTO users (email, name, avatar_url, provider, provider_id)
+                    VALUES (lower($1), $2, $3, $4, $5)
+                    ON CONFLICT (lower(email)) DO UPDATE
+                    SET
+                        provider_id = EXCLUDED.provider_id,
+                        name        = EXCLUDED.name,
+                        avatar_url  = EXCLUDED.avatar_url,
+                        updated_at  = now()
+                    RETURNING
+                        id,
+                        email,
+                        name,
+                        avatar_url,
+                        description,
+                        role AS "role: UserRole",
+                        status AS "status: UserStatus",
+                        provider AS "provider: AuthProvider",
+                        provider_id,
+                        created_at,
+                        updated_at
                 "#,
-            name,
             email,
-            password_hash
+            name,
+            avatar_url,
+            provider as AuthProvider, // Passed explicitly for the macro
+            provider_id
         )
-        .fetch_one(&self.pool)
+        .fetch_one(&self.pool) // Make sure to replace `&self.pool` with your actual connection pool field
         .await?;
 
         Ok(user)
@@ -81,22 +90,6 @@ impl AuthRepository {
         Ok(user)
     }
 
-    pub async fn save_otp(&self, user_id: uuid::Uuid, code: &str) -> Result<(), Error> {
-        sqlx::query!(
-            // Expires in 5 min
-            r#"
-                INSERT INTO user_otps (user_id, code, expires_at)
-                VALUES ($1,$2, now() + interval '5 minutes')
-            "#,
-            user_id,
-            code
-        )
-        .execute(&self.pool)
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn active_user(&self, user_id: uuid::Uuid) -> Result<(), Error> {
         sqlx::query!(
             r#"
@@ -110,35 +103,6 @@ impl AuthRepository {
         .await?;
 
         Ok(())
-    }
-
-    pub async fn delete_user_otps(&self, user_id: uuid::Uuid) -> Result<(), Error> {
-        sqlx::query!(r#"DELETE FROM user_otps WHERE user_id = $1"#, user_id)
-            .execute(&self.pool)
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn find_otp_record(
-        &self,
-        user_id: uuid::Uuid,
-        code: &str,
-    ) -> Result<Option<OtpRecord>, Error> {
-        let result = sqlx::query_as!(
-            OtpRecord,
-            r#"
-                SELECT id, expires_at
-                FROM user_otps
-                WHERE user_id = $1 AND code = $2
-                "#,
-            user_id,
-            code
-        )
-        .fetch_optional(&self.pool)
-        .await?;
-
-        Ok(result)
     }
 
     pub async fn create_session(
