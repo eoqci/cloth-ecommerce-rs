@@ -3,7 +3,7 @@ mod app_state;
 mod config;
 mod error;
 mod errors;
-mod infrastructure;
+mod infra;
 mod modules;
 mod shared;
 mod telemetry;
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =============| DATABASE CONNECTION |===============
     // ===================================================
-    let pool = infrastructure::db::create_pool(&config.database_url)
+    let pool = infra::db::create_pool(&config.database_url)
         .await
         .expect("Failed to coneect to database");
     tracing::info!("Successfully connected to Database!");
