@@ -4,9 +4,7 @@ use std::sync::Arc;
 
 use crate::{
     config::Config,
-    infrastructure::{
-        mail::ResendMailService, redis::client::RedisInfra, storage::r2::UploadService,
-    },
+    infra::{mail::ResendMailService, redis::client::RedisInfra, storage::r2::UploadService},
     modules::{
         admin::repository::AdminRepository,
         auth::AuthRepository,
@@ -98,7 +96,5 @@ impl AppState {
             product_repo,
             order_repo,
         }
-    }
-}
     }
 }
