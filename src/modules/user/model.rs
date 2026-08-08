@@ -92,9 +92,11 @@ pub struct User {
 pub struct UserSession {
     pub id: Uuid,
     pub user_id: Uuid,
+    pub session_family_id: Uuid,
     pub refresh_token_hash: String,
     pub user_agent: Option<String>,
-    pub revoked_at: Option<DateTime<Utc>>, // Added missing revoked_at from SQL
+    pub is_used: bool,
+    pub revoke_at: DateTime<Utc>,
     pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
 }
