@@ -1,4 +1,4 @@
-use crate::modules::user::model::{AuthProvider, User, UserRole, UserStatus};
+use crate::modules::user::model::{AuthProvider, User, UserRole, UserSession, UserStatus};
 use sqlx::{Error, PgPool};
 use uuid::Uuid;
 
@@ -110,6 +110,33 @@ impl AuthRepository {
             email
         )
         .fetch_optional(&self.pool)
+        .await
+    }
+
+    //user session
+    pub async fn create_session(
+        &self,
+        user_id: Uuid,
+        refresh_token_hash: &str,
+        user_agent: Option<&str>,
+        expires_in_day: i32,
+        session_family_id: Option<Uuid>, // None = login mới, Some(id) = rotate (giữ family cũ)
+    ) -> Result<UserSession, sqlx::Error> {
+        sqlx::query_as!(
+            UserSession,
+            r#"
+                INSERT INTO user_sessions (user_id, session_family_id, refresh_token_hash, user_agent, expires_at)
+                VALUES ($1, COALESCE($2, gen_random_uuid()), $3, $4, NOW() + make_interval(days => $5))
+                RETURNING id, user_id, session_family_id, refresh_token_hash, user_agent,
+                          is_used, revoked_at, expires_at, created_at
+            "#,
+            user_id,
+            session_family_id,
+            refresh_token_hash,
+            user_agent,
+            expires_in_day
+        )
+        .fetch_one(&self.pool)
         .await
     }
 }
