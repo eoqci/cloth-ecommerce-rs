@@ -120,13 +120,24 @@ CREATE UNIQUE INDEX idx_users_email_lower ON users (lower(email));
 CREATE TABLE user_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+  -- Family ID nhóm các token của cùng một thiết bị/lần đăng nhập.
+  -- Lần đầu login dùng default, các lần xoay (rotate) token sau truyền lại ID này.
+  session_family_id UUID NOT NULL DEFAULT gen_random_uuid(),
+
   refresh_token_hash TEXT NOT NULL, -- hash (vd SHA-256), không lưu token gốc
   user_agent TEXT, -- Example: Chrome or Brave On Windows
-  revoked_at TIMESTAMPTZ, -- hỗ trợ logout / force-logout tất cả thiết bị
+
+  -- Phục vụ Token Reuse Detection
+  is_used BOOLEAN NOT NULL DEFAULT FALSE,
+
+  revoked_at TIMESTAMPTZ, -- hỗ trợ logout / force-logout hoặc bị thu hồi khi phát hiện reuse
   expires_at TIMESTAMPTZ NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
 CREATE INDEX idx_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_sessions_family_id ON user_sessions(session_family_id);
 CREATE UNIQUE INDEX idx_sessions_refresh_token_hash ON user_sessions(refresh_token_hash);
 
 -- ============================================================
