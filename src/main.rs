@@ -8,6 +8,8 @@ mod modules;
 mod shared;
 mod telemetry;
 
+use std::sync::Arc;
+
 use app_state::AppState;
 use config::Config;
 
@@ -16,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // ===============| CONFIG INIT |=====================
     // ===================================================
-    let config = Config::init()?;
+    let config = Arc::new(Config::init()?);
 
     // ===================================================
     // ===============| LOGGER INIT |=====================
@@ -27,15 +29,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =============| DATABASE CONNECTION |===============
     // ===================================================
-    let pool = infra::db::create_pool(&config.database_url)
+    let pool = infra::db::create_pool(&config.database_url.clone())
         .await
         .expect("Failed to coneect to database");
     tracing::info!("Successfully connected to Database!");
 
     // ===================================================
+    // =================| HTTP CLIENT |===================
+    // ===================================================
+    let oauth_http_client = oauth2::reqwest::Client::new();
+    // ===================================================
     // =================| APP STATE |=====================
     // ===================================================
-    let state = AppState::new(config, pool);
+    let state = AppState::new(Arc::clone(&config), pool, oauth_http_client.clone())?;
     let addr = format!("{}:{}", state.config.server_host, state.config.server_port);
     let app = app::create_router(state);
     // Email service inside appstate
