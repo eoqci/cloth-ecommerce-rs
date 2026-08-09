@@ -96,7 +96,7 @@ pub struct UserSession {
     pub refresh_token_hash: String,
     pub user_agent: Option<String>,
     pub is_used: bool,
-    pub revoke_at: DateTime<Utc>,
+    pub revoked_at: Option<DateTime<Utc>>,
     pub expires_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
 }
