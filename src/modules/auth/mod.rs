@@ -2,6 +2,7 @@ pub mod dto;
 pub mod error;
 pub mod guard;
 pub mod handler;
+pub mod oauth;
 pub mod repository;
 pub mod route;
 pub mod service;
