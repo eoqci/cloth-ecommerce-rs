@@ -29,12 +29,7 @@ impl IntoResponse for AppError {
             Option<Vec<FieldError>>,
         ) = match self {
             // 4xx — client error
-            AppError::NotFound { resource } => (
-                StatusCode::NOT_FOUND,
-                "NOT_FOUND",
-                format!("{resource}"),
-                None,
-            ),
+            AppError::NotFound { resource } => (StatusCode::NOT_FOUND, "NOT_FOUND", resource, None),
             AppError::BadRequest(msg) => (StatusCode::BAD_REQUEST, "BAD_REQUEST", msg, None),
             AppError::Unauthorized(msg) => (StatusCode::UNAUTHORIZED, "UNAUTHORIZED", msg, None),
             AppError::Forbidden(msg) => (StatusCode::FORBIDDEN, "FORBIDDEN", msg, None),
@@ -44,27 +39,24 @@ impl IntoResponse for AppError {
                     StatusCode::UNPROCESSABLE_ENTITY,
                     "VALIDATION_ERROR",
                     "Validation failed".to_string(),
-                    Some(vec![FieldError {
-                        field: field.clone(),
-                        message: message.clone(),
-                    }]),
+                    Some(vec![FieldError { field, message }]),
                 ),
                 ValidationError::Multiple(errs) => (
                     StatusCode::UNPROCESSABLE_ENTITY,
                     "VALIDATION_ERROR",
                     "Validation failed".to_string(),
-                    Some(errs.clone()),
+                    Some(errs),
                 ),
             },
             // 5xx — lỗi server (log nhưng không leak detail)
-            AppError::ServiceUnvailable(msg) => (
+            AppError::ServiceUnavailable(msg) => (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "SERVICE_UNAVAILABLE",
                 msg,
                 None,
             ),
             AppError::Config(e) => {
-                error!( error = %e, "Configuration error");
+                error!(error = %e, "Configuration error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "CONFIG_ERROR",
@@ -73,7 +65,7 @@ impl IntoResponse for AppError {
                 )
             }
             AppError::Database(e) => {
-                error!( error = %e, "Database error");
+                error!(error = %e, "Database error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "DATABASE_ERROR",
@@ -82,7 +74,7 @@ impl IntoResponse for AppError {
                 )
             }
             AppError::ExternalService { service, source } => {
-                error!( %service, error = %source, "External service error");
+                error!(%service, error = %source, "External service error");
                 (
                     StatusCode::BAD_GATEWAY,
                     "EXTERNAL_SERVICE_ERROR",
@@ -91,7 +83,7 @@ impl IntoResponse for AppError {
                 )
             }
             AppError::Internal(e) => {
-                error!( error = %e, "Internal error");
+                error!(error = %e, "Internal error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "INTERNAL_ERROR",
