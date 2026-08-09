@@ -139,4 +139,69 @@ impl AuthRepository {
         .fetch_one(&self.pool)
         .await
     }
+
+    /// Revoke toàn bộ session cùng 1 session_family_id.
+    /// Gọi khi phát hiện reuse (token đã dùng bị đem dùng lại) - buộc logout cả chain.
+    pub async fn revoke_session_family(&self, session_family_id: Uuid) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+                    UPDATE user_sessions
+                    SET revoked_at = now()
+                    WHERE session_family_id = $1 AND revoked_at IS NULL
+                "#,
+            session_family_id
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.rows_affected())
+    }
+
+    /// Revoke 1 session cụ thể - dùng cho "đăng xuất thiết bị này".
+    pub async fn revoke_session(&self, session_id: Uuid) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+                    UPDATE user_sessions
+                    SET revoked_at = now()
+                    WHERE id = $1 AND revoked_at IS NULL
+                "#,
+            session_id
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.rows_affected())
+    }
+
+    /// Revoke toàn bộ session của 1 user - dùng cho "đăng xuất tất cả thiết bị".
+    pub async fn revoke_all_sessions_for_user(&self, user_id: Uuid) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+                    UPDATE user_sessions
+                    SET revoked_at = now()
+                    WHERE user_id = $1 AND revoked_at IS NULL
+                "#,
+            user_id
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.rows_affected())
+    }
+
+    /// Dọn session hết hạn / đã revoke lâu ngày - chạy định kỳ (cron job / tokio interval task).
+    /// Session revoked giữ thêm 30 ngày trước khi xoá hẳn, phòng khi cần soi lại lịch sử (audit reuse-detection).
+    pub async fn delete_expired_sessions(&self) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+                    DELETE FROM user_sessions
+                    WHERE expires_at < now()
+                       OR (revoked_at IS NOT NULL AND revoked_at < now() - interval '30 days')
+                "#
+        )
+        .execute(&self.pool)
+        .await?;
+
+        Ok(result.rows_affected())
+    }
 }
