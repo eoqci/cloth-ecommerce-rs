@@ -50,8 +50,14 @@ impl AuthState {
     }
 }
 
-// impl FromRef<AppState> for Arc<AuthRepository> {
-//     fn from_ref(state: &AppState) -> Self {
-//         state.
-//     }
-// }
+impl FromRef<AppState> for Arc<AuthRepository> {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth_state.auth_repo.clone()
+    }
+}
+
+impl FromRef<AppState> for Arc<AuthService> {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth_state.auth_service.clone()
+    }
+}
