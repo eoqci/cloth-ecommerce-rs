@@ -1,7 +1,6 @@
 mod app;
 mod app_state;
 mod config;
-mod error;
 mod errors;
 mod infra;
 mod modules;
@@ -37,13 +36,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =================| HTTP CLIENT |===================
     // ===================================================
-    let oauth_http_client = oauth2::reqwest::Client::new();
+    let oauth_http_client = oauth2::reqwest::ClientBuilder::new()
+        .redirect(oauth2::reqwest::redirect::Policy::none())
+        .build()
+        .expect("failed to build oauth http client");
     // ===================================================
     // =================| APP STATE |=====================
     // ===================================================
     let state = AppState::new(Arc::clone(&config), pool, oauth_http_client.clone())?;
+
     let addr = format!("{}:{}", state.config.server_host, state.config.server_port);
-    let app = app::create_router(state);
+    let app = app::create_router(state.clone());
     // Email service inside appstate
     tracing::info!("Email service initialized");
 
