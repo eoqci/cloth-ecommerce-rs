@@ -1,7 +1,8 @@
-use crate::error::ConfigError;
 use dotenvy::dotenv;
 use email_address::EmailAddress;
 use std::{env, str::FromStr};
+
+use crate::errors::config::ConfigError;
 
 #[derive(Debug, Clone)]
 pub struct Config {
