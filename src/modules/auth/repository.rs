@@ -23,7 +23,7 @@ impl AuthRepository {
         &self,
         email: &str,
         name: &str,
-        avatar_url: &str,
+        avatar_url: Option<&str>,
         provider: AuthProvider,
         provider_id: &str,
     ) -> Result<User, sqlx::Error> {
