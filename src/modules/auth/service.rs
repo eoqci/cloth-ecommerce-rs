@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::{config::Config, modules::auth::AuthRepository, shared::services::jwt::TokenService};
+use crate::{
+    config::Config, errors::AppError, modules::auth::AuthRepository,
+    shared::services::jwt::TokenService,
+};
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -27,5 +30,12 @@ impl AuthService {
             config,
             http_client,
         }
+    }
+
+    pub async fn google_login(
+        &self,
+        gg_user: GoogleUserInfo,
+        user_agent: Option<&str>,
+    ) -> Result<TokenPair, AppError> {
     }
 }
