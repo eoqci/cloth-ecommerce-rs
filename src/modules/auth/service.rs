@@ -76,4 +76,17 @@ impl AuthService {
             refresh_token,
         })
     }
+
+    pub async fn refresh_access_token(
+        &self,
+        old_refresh_token: &str,
+    ) -> Result<TokenPair, AppError> {
+        let new_refresh_token = self.token_sevice.generate_refresh_token();
+
+        let result = self.auth_repo.
+        Ok(TokenPair {
+            access_token: String::new(),
+            refresh_token: String::new(),
+        })
+    }
 }
