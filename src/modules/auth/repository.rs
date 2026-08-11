@@ -7,9 +7,10 @@ pub struct AuthRepository {
     pool: PgPool,
 }
 
-pub struct OtpRecord {
-    pub id: uuid::Uuid,
-    pub expires_at: chrono::DateTime<chrono::Utc>,
+pub struct RotateOutcome {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub session_family_id: Uuid,
 }
 
 impl AuthRepository {
@@ -203,5 +204,48 @@ impl AuthRepository {
         .await?;
 
         Ok(result.rows_affected())
+    }
+
+    // /auth/refresh atomic check + mark used
+    // keyed = hash - no need to know 'id' first
+    pub async fn mark_session_used_if_valid(
+        &self,
+        refresh_token_hash: &str,
+    ) -> Result<Option<RotateOutcome>, sqlx::Error> {
+        sqlx::query_as!(
+            RotateOutcome,
+            r#"
+                UPDATE user_sessions
+                SET is_used = true
+                WHERE refresh_token_hash = $1
+                    AND is_used = false
+                    AND revoked_at is NULL
+                    AND expires_at > now()
+                RETURNING id, user_id, session_family_id
+            "#,
+            refresh_token_hash
+        )
+        .fetch_optional(&self.pool)
+        .await
+    }
+
+    // only call when mark_session_used_if_valid return as None
+    // non-existent (invalid) / expired (normal) / is_used was already true (REUSE – must revoke the entire family).
+    pub async fn find_session_by_token_hash(
+        &self,
+        refresh_token_hash: &str,
+    ) -> Result<Option<UserSession>, sqlx::Error> {
+        sqlx::query_as!(
+            UserSession,
+            r#"
+                SELECT id, user_id, session_family_id, refresh_token_hash, user_agent,
+                    is_used, revoked_at, expires_at, created_at
+                FROM user_sessions
+                WHERE refresh_token_hash = $1
+            "#,
+            refresh_token_hash
+        )
+        .fetch_optional(&self.pool)
+        .await
     }
 }
