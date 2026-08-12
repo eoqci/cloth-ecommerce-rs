@@ -1,3 +1,4 @@
+use crate::{errors::AppError, modules::user::model::UserRole};
 use chrono::{Duration, Utc};
 use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use rand::{
@@ -5,9 +6,8 @@ use rand::{
     distr::{Alphanumeric, SampleString},
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use uuid::Uuid;
-
-use crate::{errors::AppError, modules::user::model::UserRole};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
@@ -51,6 +51,12 @@ impl TokenService {
 
     pub fn generate_refresh_token(&self) -> String {
         Alphanumeric.sample_string(&mut rand::rng(), 64)
+    }
+
+    pub fn hash_refresh_token(&self, raw_token: &str) -> String {
+        let mut hasher = Sha256::new();
+        hasher.update(raw_token.as_bytes());
+        hex::encode(hasher.finalize())
     }
 
     pub fn verify_access_token(&self, token: &str) -> Result<Claims, AppError> {
