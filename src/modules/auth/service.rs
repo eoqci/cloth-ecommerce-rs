@@ -59,11 +59,12 @@ impl AuthService {
             .generate_access_token(user.id, user.role)?;
 
         let refresh_token = self.token_sevice.generate_refresh_token();
+        let refresh_token_hash = self.token_sevice.hash_refresh_token(&refresh_token);
 
         self.auth_repo
             .create_session(
                 user.id,
-                &refresh_token,
+                &refresh_token_hash,
                 user_agent,
                 self.config.refresh_token_expired_in,
                 None,
