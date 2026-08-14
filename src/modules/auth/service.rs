@@ -64,8 +64,8 @@ impl AuthService {
             .request_async(&self.http_client)
             .await
             .map_err(|e| AppError::ExternalService {
-                service: "google_oauth_token".into(),
-                source: anyhow::anyhow!(e.into()),
+                service: "google_oauth_token".to_string(),
+                source: anyhow::anyhow!(e.to_string()),
             })?;
 
         let userinfo: GoogleUserInfo = self
@@ -191,7 +191,7 @@ impl AuthService {
 
         let user = self
             .auth_repo
-            .find_user_by_id(outcome.id)
+            .find_user_by_id(outcome.user_id)
             .await?
             .ok_or_else(|| AppError::Unauthorized("User not found".to_string()))?;
 
@@ -223,7 +223,7 @@ impl AuthService {
         let hash = self.token_sevice.hash_refresh_token(raw_refresh_token);
 
         if let Some(session) = self.auth_repo.find_session_by_token_hash(&hash).await? {
-            self.auth_repo.revoke_session_family(session.id).await?;
+            self.auth_repo.revoke_session(session.id).await?;
         }
 
         Ok(())
