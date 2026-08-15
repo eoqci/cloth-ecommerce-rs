@@ -32,12 +32,13 @@ impl AuthState {
 
         let token_service = Arc::new(TokenService::new(
             config.jwt_secret.clone(),
-            config.jwt_expired_in.clone(),
+            config.access_token_ttl_seconds.clone(),
         ));
         let auth_service = Arc::new(AuthService::new(
             auth_repo.clone(),
             token_service,
             Arc::clone(&config),
+            oauth_client.clone(),
             oauth_http_client.clone(),
         ));
 
