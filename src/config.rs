@@ -21,8 +21,8 @@ pub struct Config {
     pub from_email: String,
     //jwt env
     pub jwt_secret: String,
-    pub jwt_expired_in: i64,
-    pub refresh_token_expired_in: i32,
+    pub access_token_ttl_seconds: i64,
+    pub refresh_token_ttl_days: i32,
     // google config
     pub google_client_id: String,
     pub google_client_secret: String,
@@ -80,8 +80,8 @@ impl Config {
 
             //==============================| JWT |==============================
             jwt_secret: Self::get_env("JWT_SECRET")?,
-            jwt_expired_in: Self::get_number_env::<i64>("JWT_EXPIRED_IN")?,
-            refresh_token_expired_in: Self::get_number_env::<i32>("REFRESH_TOKEN_EXPIRED_IN")?,
+            access_token_ttl_seconds: Self::get_number_env::<i64>("ACCESS_TOKEN_TTL_SECONDS")?,
+            refresh_token_ttl_days: Self::get_number_env::<i32>("refresh_token_ttl_days")?,
 
             //==============================| GOOGLE |==============================
             google_client_id: Self::get_env("GOOGLE_CLIENT_ID").expect("GOOGLE_CLIENT_ID"),
