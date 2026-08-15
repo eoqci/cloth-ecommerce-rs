@@ -6,10 +6,7 @@ use crate::{
     config::Config,
     errors::AppError,
     modules::{
-        auth::{
-            AuthRepository, RotateOutcome, dto::GoogleUserInfo, error::AuthError,
-            oauth::GoogleOAuthClient,
-        },
+        auth::{AuthRepository, RotateOutcome, dto::GoogleUserInfo, oauth::GoogleOAuthClient},
         user::model::{AuthProvider, User},
     },
     shared::services::jwt::TokenService,
@@ -103,7 +100,7 @@ impl AuthService {
                 user.id,
                 &hash,
                 user_agent,
-                self.config.refresh_token_expired_in,
+                self.config.refresh_token_ttl_days,
                 None,
             )
             .await?;
@@ -116,50 +113,6 @@ impl AuthService {
             user,
             access_token,
             raw_refresh_token,
-        })
-    }
-
-    pub async fn google_login(
-        &self,
-        gg_user: GoogleUserInfo,
-        user_agent: Option<&str>,
-    ) -> Result<TokenPair, AppError> {
-        let user = self
-            .auth_repo
-            .find_or_create_by_google(
-                &gg_user.email,
-                &gg_user.name,
-                gg_user.avatar_url.as_deref(),
-                gg_user.provider,
-                &gg_user.google_id,
-            )
-            .await
-            .map_err(|e| {
-                tracing::error!("Database Error finding/creating user: {:?}", e);
-                AuthError::AuthorizationFailed
-            })?;
-
-        let access_token = self
-            .token_sevice
-            .generate_access_token(user.id, user.role)?;
-
-        let refresh_token = self.token_sevice.generate_refresh_token();
-        let refresh_token_hash = self.token_sevice.hash_refresh_token(&refresh_token);
-
-        self.auth_repo
-            .create_session(
-                user.id,
-                &refresh_token_hash,
-                user_agent,
-                self.config.refresh_token_expired_in,
-                None,
-            )
-            .await
-            .map_err(|_| AuthError::AuthorizationFailed)?;
-
-        Ok(TokenPair {
-            access_token,
-            refresh_token,
         })
     }
 
@@ -203,7 +156,7 @@ impl AuthService {
                 outcome.user_id,
                 &new_hash,
                 user_agent,
-                self.config.refresh_token_expired_in,
+                self.config.refresh_token_ttl_days,
                 Some(outcome.session_family_id),
             )
             .await?;
