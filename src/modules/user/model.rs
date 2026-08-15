@@ -6,7 +6,7 @@ use uuid::Uuid;
 //==================| ENUMS ALREADY PROVIDED |=====================
 
 // DB type: user_role_type
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "user_role_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum UserRole {
@@ -17,7 +17,7 @@ pub enum UserRole {
 }
 
 // DB type: user_status_type
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "user_status_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum UserStatus {
@@ -27,7 +27,7 @@ pub enum UserStatus {
 }
 
 // DB type: auth_provider_type
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "auth_provider_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum AuthProvider {
@@ -37,7 +37,7 @@ pub enum AuthProvider {
 //==================| NEW ENUMS |=====================
 
 // DB type: order_status_type
-#[derive(PartialEq, Debug, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "order_status_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum OrderStatus {
@@ -51,7 +51,7 @@ pub enum OrderStatus {
 }
 
 // DB type: payment_status_type
-#[derive(PartialEq, Debug, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "payment_status_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum PaymentStatus {
@@ -62,7 +62,7 @@ pub enum PaymentStatus {
 }
 
 // DB type: product_status_type
-#[derive(PartialEq, Debug, Serialize, Deserialize, sqlx::Type)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, sqlx::Type)]
 #[sqlx(type_name = "product_status_type", rename_all = "lowercase")]
 #[serde(rename_all = "snake_case")]
 pub enum ProductStatus {
