@@ -1,4 +1,7 @@
 use crate::config::Config;
+use crate::modules::auth::cookies::{
+    ACCESS_TOKEN_COOKIE, ACCESS_TOKEN_PATH, AUTH_PATH, REFRESH_TOKEN_COOKIE,
+};
 use axum::response::Response;
 use axum::{
     http::{HeaderMap, HeaderValue, StatusCode, header},
@@ -54,13 +57,26 @@ pub fn clear_auth_cookies_response(status: StatusCode, config: &Config) -> Respo
     // Max-Age=0
     // Remove cookie immediately
     let clear_access = build_cookie_string("access_token", "", "/", 0, config);
-    let clear_refresh = build_cookie_string("refresh_token", "", "/api/v1/auth/refresh", 0, config);
+    let clear_refresh = build_cookie_string("refresh_token", "", "/api/v1/auth", 0, config);
 
     let mut response = status.into_response();
     if let Ok(v) = HeaderValue::from_str(&clear_access) {
         response.headers_mut().append(header::SET_COOKIE, v);
     }
     if let Ok(v) = HeaderValue::from_str(&clear_refresh) {
+        response.headers_mut().append(header::SET_COOKIE, v);
+    }
+    response
+}
+
+pub fn with_cleared_cookie(
+    mut response: Response,
+    name: &str,
+    path: &str,
+    config: &Config,
+) -> Response {
+    let clear = build_cookie_string(name, "", path, 0, config);
+    if let Ok(v) = HeaderValue::from_str(&clear) {
         response.headers_mut().append(header::SET_COOKIE, v);
     }
     response
