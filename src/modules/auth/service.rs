@@ -9,7 +9,7 @@ use crate::{
         auth::{AuthRepository, RotateOutcome, dto::GoogleUserInfo, oauth::GoogleOAuthClient},
         user::model::{AuthProvider, User},
     },
-    shared::services::jwt::TokenService,
+    shared::services::jwt::{Claims, TokenService},
 };
 
 #[derive(Clone)]
@@ -180,5 +180,9 @@ impl AuthService {
         }
 
         Ok(())
+    }
+
+    pub fn verify_access_token(&self, token: &str) -> Result<Claims, AppError> {
+        self.token_sevice.verify_access_token(token)
     }
 }
