@@ -21,7 +21,7 @@ use crate::{
     shared::utils::cookies::{build_cookie_string, extract_cookie},
 };
 
-// [POST] /api/v1/auth/google -create, redirect to google
+// [POST] /api/v1/auth/google-login - create, redirect to google
 pub async fn google_login(State(state): State<AppState>) -> Response {
     let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
     let (authorize_url, csrf_token) = state
@@ -64,7 +64,7 @@ pub async fn google_login(State(state): State<AppState>) -> Response {
     response
 }
 
-// [GET] api/v1/auth/google/callbaclk
+// [GET] api/v1/auth/google/callback
 pub async fn google_callback(
     State(state): State<AppState>,
     headers: HeaderMap,
@@ -136,8 +136,8 @@ pub async fn google_callback(
     Ok(response)
 }
 
-// [POST] /api/v1/auth/refresh
-pub async fn refresh(State(state): State<AppState>, headers: HeaderMap) -> Response {
+// [POST] /api/v1/auth/refresh-token
+pub async fn refresh_token(State(state): State<AppState>, headers: HeaderMap) -> Response {
     let user_agent = headers
         .get(header::USER_AGENT)
         .and_then(|v| v.to_str().ok());
