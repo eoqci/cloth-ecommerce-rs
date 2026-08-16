@@ -14,3 +14,10 @@ pub struct GoogleUserInfo {
     #[serde(rename = "picture")]
     pub avatar_url: Option<String>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct GoogleCallbackQuery {
+    pub code: Option<String>,
+    pub state: Option<String>,
+    pub error: Option<String>,
+}
