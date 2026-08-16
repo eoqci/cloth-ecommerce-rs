@@ -1,7 +1,4 @@
 use crate::config::Config;
-use crate::modules::auth::cookies::{
-    ACCESS_TOKEN_COOKIE, ACCESS_TOKEN_PATH, AUTH_PATH, REFRESH_TOKEN_COOKIE,
-};
 use axum::response::Response;
 use axum::{
     http::{HeaderMap, HeaderValue, StatusCode, header},
