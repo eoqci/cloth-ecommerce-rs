@@ -68,12 +68,11 @@ pub fn create_router(state: AppState) -> Router {
 }
 
 fn api_v1() -> Router<AppState> {
-    Router::new()
-        .nest("/auth", modules::auth::auth_router())
-        .nest("/users", modules::user::user_router())
-        .nest("/carts", modules::cart::cart_router())
-        .nest("/categories", modules::category::category_router())
-        .nest("/products", modules::product::product_router())
-        .nest("/orders", modules::order::order_router())
-        .nest("/admin", modules::admin::admin_router())
+    Router::new().nest("/auth", modules::auth::auth_router())
+    // .nest("/users", modules::user::user_router())
+    // .nest("/carts", modules::cart::cart_router())
+    // .nest("/categories", modules::category::category_router())
+    // .nest("/products", modules::product::product_router())
+    // .nest("/orders", modules::order::order_router())
+    // .nest("/admin", modules::admin::admin_router())
 }
