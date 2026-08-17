@@ -17,7 +17,7 @@ impl AppState {
     pub fn new(
         config: Arc<Config>,
         db: PgPool,
-        oauth_http_client: oauth2::reqwest::Client,
+        oauth_http_client: reqwest::Client,
     ) -> Result<Self, AppError> {
         //=======================================================
         // =====================| MODULE STATE |===================
