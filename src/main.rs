@@ -36,14 +36,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =================| HTTP CLIENT |===================
     // ===================================================
-    let oauth_http_client = reqwest::ClientBuilder::new()
-        .redirect(reqwest::redirect::Policy::none())
+
+    // for some dog sh1t reason or I can't read, http client doesn't work with googleplay oauth
+    // so, the way i will handle this is make two client for this
+    // the fn receive 2 params (oauth_http_client, http_client)
+    let oauth_http_client = oauth2::reqwest::ClientBuilder::new()
+        .redirect(oauth2::reqwest::redirect::Policy::none())
         .build()
         .expect("failed to build oauth http client");
+    let http_client = reqwest::ClientBuilder::new()
+        .build()
+        .expect("failed to build http client");
+
     // ===================================================
     // =================| APP STATE |=====================
     // ===================================================
-    let state = AppState::new(Arc::clone(&config), pool, oauth_http_client.clone())?;
+    let state = AppState::new(
+        Arc::clone(&config),
+        pool,
+        oauth_http_client.clone(),
+        http_client.clone(),
+    )?;
 
     let addr = format!("{}:{}", state.config.server_host, state.config.server_port);
     let app = app::create_router(state.clone());
