@@ -36,8 +36,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =================| HTTP CLIENT |===================
     // ===================================================
-    let oauth_http_client = oauth2::reqwest::ClientBuilder::new()
-        .redirect(oauth2::reqwest::redirect::Policy::none())
+    let oauth_http_client = reqwest::ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
         .build()
         .expect("failed to build oauth http client");
     // ===================================================
