@@ -18,13 +18,13 @@ pub struct AuthState {
     pub auth_repo: Arc<AuthRepository>,
     pub auth_service: Arc<AuthService>,
     pub oauth_client: GoogleOAuthClient,
-    pub oauth_http_client: oauth2::reqwest::Client,
+    pub oauth_http_client: reqwest::Client,
 }
 
 impl AuthState {
     pub fn new(
         db: PgPool,
-        oauth_http_client: oauth2::reqwest::Client,
+        oauth_http_client: reqwest::Client,
         config: Arc<Config>,
     ) -> Result<Self, AppError> {
         let auth_repo = Arc::new(AuthRepository::new(db.clone()));
