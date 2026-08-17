@@ -1,7 +1,5 @@
 use std::sync::Arc;
 
-use oauth2::{AuthorizationCode, PkceCodeVerifier, TokenResponse};
-
 use crate::{
     config::Config,
     errors::AppError,
@@ -11,6 +9,7 @@ use crate::{
     },
     shared::services::jwt::{Claims, TokenService},
 };
+use oauth2::{AuthorizationCode, PkceCodeVerifier, TokenResponse};
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -18,6 +17,7 @@ pub struct AuthService {
     token_sevice: Arc<TokenService>,
     config: Arc<Config>,
     oauth_client: GoogleOAuthClient,
+    oauth_http_client: oauth2::reqwest::Client,
     http_client: reqwest::Client,
 }
 
@@ -37,6 +37,7 @@ impl AuthService {
         token_sevice: Arc<TokenService>,
         config: Arc<Config>,
         oauth_client: GoogleOAuthClient,
+        oauth_http_client: oauth2::reqwest::Client,
         http_client: reqwest::Client,
     ) -> Self {
         Self {
@@ -44,6 +45,7 @@ impl AuthService {
             token_sevice,
             config,
             oauth_client,
+            oauth_http_client,
             http_client,
         }
     }
@@ -58,7 +60,7 @@ impl AuthService {
             .oauth_client
             .exchange_code(AuthorizationCode::new(code))
             .set_pkce_verifier(pkce_verifier)
-            .request_async(&self.http_client)
+            .request_async(&self.oauth_http_client)
             .await
             .map_err(|e| AppError::ExternalService {
                 service: "google_oauth_token".to_string(),
@@ -89,7 +91,7 @@ impl AuthService {
                 &userinfo.name,
                 userinfo.avatar_url.as_deref(),
                 AuthProvider::Google,
-                &userinfo.sub,
+                &userinfo.google_id,
             )
             .await?;
         let raw_refresh_token = self.token_sevice.generate_refresh_token();
