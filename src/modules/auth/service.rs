@@ -18,7 +18,7 @@ pub struct AuthService {
     token_sevice: Arc<TokenService>,
     config: Arc<Config>,
     oauth_client: GoogleOAuthClient,
-    http_client: oauth2::reqwest::Client,
+    http_client: reqwest::Client,
 }
 
 pub struct TokenPair {
@@ -37,7 +37,7 @@ impl AuthService {
         token_sevice: Arc<TokenService>,
         config: Arc<Config>,
         oauth_client: GoogleOAuthClient,
-        http_client: oauth2::reqwest::Client,
+        http_client: reqwest::Client,
     ) -> Self {
         Self {
             auth_repo,
