@@ -16,10 +16,10 @@ pub struct AuthUser {
 impl FromRequestParts<AppState> for AuthUser {
     type Rejection = AppError;
 
-    fn from_request_parts(
+    async fn from_request_parts(
         parts: &mut axum::http::request::Parts,
         state: &AppState,
-    ) -> impl Future<Output = Result<Self, Self::Rejection>> + Send {
+    ) -> Result<Self, Self::Rejection> {
         let token = extract_cookie(&parts.headers, ACCESS_TOKEN_COOKIE).ok_or_else(|| {
             AppError::Unauthorized("Missing verify token. Please, login again!".to_string())
         })?;
