@@ -1,5 +1,5 @@
 use crate::modules::user::model::{AuthProvider, User, UserRole, UserSession, UserStatus};
-use sqlx::{Error, PgPool};
+use sqlx::PgPool;
 use uuid::Uuid;
 
 #[derive(Clone)]
@@ -247,5 +247,82 @@ impl AuthRepository {
         )
         .fetch_optional(&self.pool)
         .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[sqlx::test]
+    async fn mark_session_used_if_valid_rejects_replay(pool: PgPool) {
+        let repo = AuthRepository::new(pool.clone());
+        let user = repo
+            .find_or_create_by_google(
+                "test@example.com",
+                "Test User",
+                None,
+                AuthProvider::Google,
+                "sub-1",
+            )
+            .await
+            .unwrap();
+        repo.create_session(user.id, "hash-abc", None, 30, None)
+            .await
+            .unwrap();
+
+        let first = repo.mark_session_used_if_valid("hash-abc").await.unwrap();
+        assert!(first.is_some(), "It has to succeed the first time");
+
+        let second = repo.mark_session_used_if_valid("hash-abc").await.unwrap();
+        assert!(
+            second.is_none(),
+            "Replays must be blocked—this is the core property of RTR."
+        );
+    }
+
+    #[sqlx::test]
+    async fn revoke_session_family_does_not_touch_other_families(pool: PgPool) {
+        let repo = AuthRepository::new(pool.clone());
+        let user = repo
+            .find_or_create_by_google(
+                "multi@sample.com",
+                "Multi",
+                None,
+                AuthProvider::Google,
+                "sub-2",
+            )
+            .await
+            .unwrap();
+
+        let laptop = repo
+            .create_session(user.id, "hash-laptop", None, 30, None)
+            .await
+            .unwrap();
+        let phone = repo
+            .create_session(user.id, "hash-phone", None, 30, None)
+            .await
+            .unwrap();
+        assert_ne!(laptop.session_family_id, phone.session_family_id);
+
+        repo.revoke_session_family(laptop.session_family_id)
+            .await
+            .unwrap();
+
+        let laptop_after = repo
+            .find_session_by_token_hash("hash-laptop")
+            .await
+            .unwrap()
+            .unwrap();
+        let phone_after = repo
+            .find_session_by_token_hash("hash-phone")
+            .await
+            .unwrap()
+            .unwrap();
+        assert!(laptop_after.revoked_at.is_none());
+        assert!(
+            phone_after.revoked_at.is_none(),
+            "The phone must NOT be affected"
+        )
     }
 }
