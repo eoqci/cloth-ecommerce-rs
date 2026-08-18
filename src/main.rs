@@ -22,7 +22,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // ===============| LOGGER INIT |=====================
     // ===================================================
-    telemetry::init();
+    let _guard = telemetry::init()?;
     tracing::info!("Starting Server...");
 
     // ===================================================
@@ -45,6 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .expect("failed to build oauth http client");
     let http_client = reqwest::ClientBuilder::new()
+        .redirect(reqwest::redirect::Policy::none())
         .build()
         .expect("failed to build http client");
 
