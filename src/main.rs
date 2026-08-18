@@ -1,16 +1,9 @@
-mod app;
-mod app_state;
-mod config;
-mod errors;
-mod infra;
-mod modules;
-mod shared;
-mod telemetry;
-
 use std::sync::Arc;
 
-use app_state::AppState;
-use config::Config;
+use axum_ecommerce::app_state::AppState;
+use axum_ecommerce::config::Config;
+use axum_ecommerce::infra::db;
+use axum_ecommerce::{app, telemetry};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // ===================================================
     // =============| DATABASE CONNECTION |===============
     // ===================================================
-    let pool = infra::db::create_pool(&config.database_url.clone())
+    let pool = db::create_pool(&config.database_url.clone())
         .await
         .expect("Failed to coneect to database");
     tracing::info!("Successfully connected to Database!");
