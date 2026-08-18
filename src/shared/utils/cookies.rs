@@ -50,21 +50,6 @@ pub fn extract_cookie<'a>(headers: &'a HeaderMap, name: &str) -> Option<String> 
         })
 }
 
-pub fn clear_auth_cookies_response(status: StatusCode, config: &Config) -> Response {
-    // Max-Age=0
-    // Remove cookie immediately
-    let clear_access = build_cookie_string("access_token", "", "/", 0, config);
-    let clear_refresh = build_cookie_string("refresh_token", "", "/api/v1/auth", 0, config);
-
-    let mut response = status.into_response();
-    if let Ok(v) = HeaderValue::from_str(&clear_access) {
-        response.headers_mut().append(header::SET_COOKIE, v);
-    }
-    if let Ok(v) = HeaderValue::from_str(&clear_refresh) {
-        response.headers_mut().append(header::SET_COOKIE, v);
-    }
-    response
-}
 
 pub fn with_cleared_cookie(
     mut response: Response,
@@ -78,3 +63,20 @@ pub fn with_cleared_cookie(
     }
     response
 }
+
+
+// pub fn clear_auth_cookies_response(status: StatusCode, config: &Config) -> Response {
+//     // Max-Age=0
+//     // Remove cookie immediately
+//     let clear_access = build_cookie_string("access_token", "", "/", 0, config);
+//     let clear_refresh = build_cookie_string("refresh_token", "", "/api/v1/auth", 0, config);
+
+//     let mut response = status.into_response();
+//     if let Ok(v) = HeaderValue::from_str(&clear_access) {
+//         response.headers_mut().append(header::SET_COOKIE, v);
+//     }
+//     if let Ok(v) = HeaderValue::from_str(&clear_refresh) {
+//         response.headers_mut().append(header::SET_COOKIE, v);
+//     }
+//     response
+// }
