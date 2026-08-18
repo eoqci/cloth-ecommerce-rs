@@ -3,13 +3,13 @@
 ## ON WORKING:
 
 - [ ] Appstate - devine state into seperate module for easy maintain - may need a docs anyway, because its quite hard to read every single file.
-- [ ] Telemetry - log output config properly i guess.
 - [ ] App router - middleware (seem not really protected yet, so i will change something soon, like cookies, lax, some infra(domain) problems)
 
 # DONE:
 
 - [x] Config file parser
 - [x] Error repsonse - may need to change in future but not the must.
+- [x] Telemetry - log output config.
 
 # MODULE REFACTORING LIST
 
