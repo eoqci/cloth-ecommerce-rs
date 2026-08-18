@@ -319,7 +319,7 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        assert!(laptop_after.revoked_at.is_none());
+        assert!(laptop_after.revoked_at.is_some());
         assert!(
             phone_after.revoked_at.is_none(),
             "The phone must NOT be affected"
