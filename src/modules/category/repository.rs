@@ -132,3 +132,56 @@ impl CategoryRepository {
         Ok(result.rows_affected())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[sqlx::test]
+    async fn create_and_find_category(pool: PgPool) {
+        let repo = CategoryRepository::new(pool);
+
+        let created = repo.create("Áo", "ao", None).await.unwrap();
+        assert_eq!(created.name, "Áo");
+        assert!(created.parent_id.is_none());
+
+        let found = repo.find_by_id(created.id).await.unwrap().unwrap();
+        assert_eq!(found.id, created.id);
+
+        let by_slug = repo.find_by_slug("ao").await.unwrap().unwrap();
+        assert_eq!(by_slug.id, created.id);
+    }
+
+    #[sqlx::test]
+    async fn update_rejects_self_parent(pool: PgPool) {
+        let repo = CategoryRepository::new(pool);
+        let a = repo.create("A", "a", None).await.unwrap();
+
+        let result = repo.update(a.id, "A", "a", Some(a.id)).await;
+        assert!(matches!(result, Err(AppError::BadRequest(_))));
+    }
+
+    #[sqlx::test]
+    async fn update_rejects_multi_level_cycle(pool: PgPool) {
+        let repo = CategoryRepository::new(pool);
+        let a = repo.create("A", "a", None).await.unwrap();
+        let b = repo.create("B", "b", Some(a.id)).await.unwrap();
+        let c = repo.create("C", "c", Some(b.id)).await.unwrap();
+
+        // A -> B -> C, thử đặt cha của A thành C (chính là cháu của A) - phải bị chặn
+        let result = repo.update(a.id, "A", "a", Some(c.id)).await;
+        assert!(matches!(result, Err(AppError::BadRequest(_))));
+    }
+
+    #[sqlx::test]
+    async fn update_allows_valid_reparent(pool: PgPool) {
+        let repo = CategoryRepository::new(pool);
+        let a = repo.create("A", "a", None).await.unwrap();
+        let b = repo.create("B", "b", Some(a.id)).await.unwrap();
+        let d = repo.create("D", "d", None).await.unwrap();
+
+        // D đang không có cha, đổi sang làm con của B - hợp lệ, không cycle
+        let updated = repo.update(d.id, "D", "d", Some(b.id)).await.unwrap();
+        assert_eq!(updated.parent_id, Some(b.id));
+    }
+}
