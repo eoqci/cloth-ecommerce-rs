@@ -30,13 +30,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // =================| HTTP CLIENT |===================
     // ===================================================
 
-    // for some dog sh1t reason or I can't read, http client doesn't work with googleplay oauth
+    // for some dog sh1t reason or maybe because i can't read, http client doesn't work with googleplay oauth
     // so, the way i will handle this is make two client for this
     // the fn receive 2 params (oauth_http_client, http_client)
     let oauth_http_client = oauth2::reqwest::ClientBuilder::new()
         .redirect(oauth2::reqwest::redirect::Policy::none())
         .build()
         .expect("failed to build oauth http client");
+    // this http_client for almost all services that needs it, not only for oauth
     let http_client = reqwest::ClientBuilder::new()
         .redirect(reqwest::redirect::Policy::none())
         .build()
