@@ -58,10 +58,10 @@ rand = "0.10.0"
 log = "0.4.29"
 
 # mail smtp
-lettre = { version = "0.11", features = ["tokio1", "tokio1-native-tls", "smtp-transport", "builder"] }
+# lettre = { version = "0.11", features = ["tokio1", "tokio1-native-tls", "smtp-transport", "builder"] }
 async-trait = "0.1.89"
-resend-rs = "0.21.0"
-email_address = "0.2.9"
+# resend-rs = "0.21.0"
+# email_address = "0.2.9"
 
 reqwest = {version = "0.13.1", features = ["json"]}
 base64 = "0.22.1"

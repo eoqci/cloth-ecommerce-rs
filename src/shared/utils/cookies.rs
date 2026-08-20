@@ -1,9 +1,5 @@
 use crate::config::Config;
-use axum::response::Response;
-use axum::{
-    http::{HeaderMap, HeaderValue, StatusCode, header},
-    response::IntoResponse,
-};
+use axum::http::{HeaderMap, HeaderValue, header};
 
 pub fn build_cookie_string(
     name: &str,
@@ -50,7 +46,6 @@ pub fn extract_cookie<'a>(headers: &'a HeaderMap, name: &str) -> Option<String> 
         })
 }
 
-
 pub fn with_cleared_cookie(
     mut response: Response,
     name: &str,
@@ -63,7 +58,6 @@ pub fn with_cleared_cookie(
     }
     response
 }
-
 
 // pub fn clear_auth_cookies_response(status: StatusCode, config: &Config) -> Response {
 //     // Max-Age=0
