@@ -1,5 +1,4 @@
 use dotenvy::dotenv;
-use email_address::EmailAddress;
 use std::{env, str::FromStr};
 
 use crate::errors::config::ConfigError;
@@ -18,7 +17,7 @@ pub struct Config {
     pub domain_name: String,
     // Resend env
     pub resend_api_key: String,
-    pub from_email: String,
+    // pub from_email: String,
     //jwt env
     pub jwt_secret: String,
     pub access_token_ttl_seconds: i64,
@@ -45,12 +44,12 @@ impl Config {
         }
     }
 
-    fn get_email_env(key: &str) -> Result<String, ConfigError> {
-        let email = Self::get_env(key)?;
-        EmailAddress::from_str(&email)
-            .map_err(|_| ConfigError::InvalidEmailFormat(email.clone()))?;
-        Ok(email)
-    }
+    // fn get_email_env(key: &str) -> Result<String, ConfigError> {
+    //     let email = Self::get_env(key)?;
+    //     EmailAddress::from_str(&email)
+    //         .map_err(|_| ConfigError::InvalidEmailFormat(email.clone()))?;
+    //     Ok(email)
+    // }
 
     fn get_number_env<T>(key: &str) -> Result<T, ConfigError>
     where
@@ -76,7 +75,7 @@ impl Config {
 
             //==============================| EMAIL |==============================
             resend_api_key: Self::get_env("RESEND_API_KEY")?,
-            from_email: Self::get_email_env("FROM_EMAIL")?,
+            // from_email: Self::get_email_env("FROM_EMAIL")?,
 
             //==============================| JWT |==============================
             jwt_secret: Self::get_env("JWT_SECRET")?,

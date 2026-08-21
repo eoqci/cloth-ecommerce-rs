@@ -1,5 +1,8 @@
 use crate::config::Config;
-use axum::http::{HeaderMap, HeaderValue, header};
+use axum::{
+    http::{HeaderMap, HeaderValue, header},
+    response::Response,
+};
 
 pub fn build_cookie_string(
     name: &str,
