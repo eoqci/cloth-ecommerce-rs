@@ -1,7 +1,11 @@
 use sqlx::PgPool;
 use std::sync::Arc;
 
-use crate::{config::Config, errors::AppError, modules::auth::state::AuthState};
+use crate::{
+    config::Config,
+    errors::AppError,
+    modules::{auth::state::AuthState, category::state::CategoryState},
+};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -11,6 +15,7 @@ pub struct AppState {
     pub db: PgPool,
     // ==================| MODULE STATE |======================
     pub auth_state: AuthState,
+    pub category_state: CategoryState,
 }
 
 impl AppState {
@@ -21,7 +26,7 @@ impl AppState {
         http_client: reqwest::Client,
     ) -> Result<Self, AppError> {
         //=======================================================
-        // =====================| MODULE STATE |===================
+        //=====================| MODULE STATE |==================
         //=======================================================
 
         let auth_state = AuthState::new(
@@ -31,10 +36,18 @@ impl AppState {
             config.clone(),
         )?;
 
+        let category_state = CategoryState::new(db.clone());
+
         Ok(Self {
             config,
             db,
+
+            //=======================================================
+            //=====================| MODULE STATE |==================
+            //=======================================================
             auth_state,
+            category_state,
         })
     }
 }
+
