@@ -1,22 +1,25 @@
-// hcuse std::sync::Arc;
+use std::sync::Arc;
 
-// use sqlx::PgPool;
+use axum::extract::FromRef;
+use sqlx::PgPool;
 
-// use crate::modules::category::{repository::CategoryRepository, service::CategoryService};
+use crate::{app_state::AppState, modules::category::repository::CategoryRepository};
 
-// #[derive(Clone)]
-// pub struct CategoryState {
-//     pub category_repo: Arc<CategoryRepository>,
-//     pub category_service: Arc<CategoryService>,
-// }
+#[derive(Clone)]
+pub struct CategoryState {
+    pub category_repo: Arc<CategoryRepository>,
+}
 
-// impl CategoryState {
-//     pub fn new(db: PgPool) -> Self {
-//         let category_repo = Arc::new(CategoryRepository::new(db.clone()));
-//         let category_service = Arc::new(CategoryService::new(category_repo.clone()));
-//         Self {
-//             category_repo,
-//             category_service,
-//         }
-//     }
-// }
+impl CategoryState {
+    pub fn new(db: PgPool) -> Self {
+        let category_repo = Arc::new(CategoryRepository::new(db.clone()));
+
+        Self { category_repo }
+    }
+}
+
+impl FromRef<AppState> for Arc<CategoryRepository> {
+    fn from_ref(state: &AppState) -> Self {
+        state.category_state.category_repo.clone()
+    }
+}
