@@ -1,64 +1,75 @@
-use axum::{Json, extract::State, http::StatusCode, response::IntoResponse};
-use validator::Validate;
+use std::sync::Arc;
+
+use axum::{
+    Json,
+    extract::{Path, State},
+    http::StatusCode,
+};
 
 use crate::{
-    app_state::AppState,
-    error::AppError,
+    errors::AppError,
     modules::{
         auth::guard::AuthUser,
-        category::{dto::CreateCategoryRequest, service::CategoryService},
+        category::{
+            dto::{CreateCategoryRequest, UpdateCategoryRequest},
+            model::Category,
+            repository::CategoryRepository,
+        },
         user::model::UserRole,
     },
 };
 
-// API: GET /api/v1/categories
-pub async fn get_category_tree(
-    State(state): State<AppState>,
-) -> Result<impl IntoResponse, AppError> {
-    let category_service = CategoryService::new(state.category_repo.clone());
-
-    let tree = category_service.get_category_tree().await?;
-
-    Ok((
-        StatusCode::OK,
-        Json(serde_json::json!({
-            "status": "success",
-            "data": tree
-        })),
-    )
-        .into_response())
+pub async fn list_categories(
+    State(state): State<Arc<CategoryRepository>>,
+) -> Result<Json<Vec<Category>>, AppError> {
+    Ok(Json(state.list_all().await?))
 }
 
-// API: POST /api/v1/categories
+pub async fn get_category(
+    State(state): State<Arc<CategoryRepository>>,
+    Path(id): Path<i32>,
+) -> Result<Json<Category>, AppError> {
+    let category = state
+        .find_by_id(id)
+        .await?
+        .ok_or_else(|| AppError::NotFound {
+            resource: "Category".to_string(),
+        })?;
+    Ok(Json(category))
+}
+
+// Admin Only
 pub async fn create_category(
-    State(state): State<AppState>,
-    user: AuthUser, // Require login Bearer
+    user: AuthUser,
+    State(state): State<Arc<CategoryRepository>>,
     Json(payload): Json<CreateCategoryRequest>,
-) -> Result<impl IntoResponse, AppError> {
-    // 1. Phân quyền sơ bộ: Chỉ Admin hoặc Seller mới được phép qua
-    user.require_roles(&[UserRole::Admin, UserRole::Seller])?;
+) -> Result<Json<Category>, AppError> {
+    user.require_roles(&[UserRole::Admin, UserRole::Moderator])?;
+    let category = state
+        .create(&payload.name, &payload.slug, payload.parent_id)
+        .await?;
+    Ok(Json(category))
+}
 
-    // 2. Kiểm tra dữ liệu hợp lệ (Validation)
-    if let Err(e) = payload.validate() {
-        // Vợ dùng lại hàm xử lý lỗi validation giống bên Auth nha
-        // Chồng viết tạm trả về BadRequest cho gọn
-        return Err(AppError::BadRequest(
-            "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại tên danh mục!".to_string(),
-        ));
-    }
+pub async fn update_category(
+    user: AuthUser,
+    State(state): State<Arc<CategoryRepository>>,
+    Path(id): Path<i32>,
+    Json(payload): Json<UpdateCategoryRequest>,
+) -> Result<Json<Category>, AppError> {
+    user.require_roles(&[UserRole::Admin, UserRole::Moderator])?;
+    let category = state
+        .update(id, &payload.name, &payload.slug, payload.parent_id)
+        .await?;
+    Ok(Json(category))
+}
 
-    // 3. Khởi tạo Service và lưu vào DB
-    let category_service = CategoryService::new(state.category_repo.clone());
-    let new_category = category_service.create_category(payload).await?;
-
-    // 4. Trả về kết quả
-    Ok((
-        StatusCode::CREATED, // HTTP 201 Created
-        Json(serde_json::json!({
-            "status": "success",
-            "message": "Tạo danh mục thành công!",
-            "data": new_category
-        })),
-    )
-        .into_response())
+pub async fn delete_category(
+    user: AuthUser,
+    State(state): State<Arc<CategoryRepository>>,
+    Path(id): Path<i32>,
+) -> Result<StatusCode, AppError> {
+    user.require_roles(&[UserRole::Admin, UserRole::Moderator])?;
+    state.delete(id).await?;
+    Ok(StatusCode::NO_CONTENT)
 }
