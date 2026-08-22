@@ -1,19 +1,15 @@
-use serde::{Deserialize, Serialize};
-use validator::Validate;
+use serde::Deserialize;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CategoryTreeResponse {
-    pub id: i32,
+#[derive(Debug, Deserialize)]
+pub struct CreateCategoryRequest {
     pub name: String,
     pub slug: String,
-    pub children: Vec<CategoryTreeResponse>,
+    pub parent_id: Option<i32>,
 }
 
-#[derive(Debug, Deserialize, Serialize, Validate)]
-pub struct CreateCategoryRequest {
-    #[validate(length(min = 1, message = "Tên không được để trống"))]
+#[derive(Debug, Deserialize)]
+pub struct UpdateCategoryRequest {
     pub name: String,
-    #[validate(length(min = 1, message = "Slug không được để trống"))]
     pub slug: String,
     pub parent_id: Option<i32>,
 }
